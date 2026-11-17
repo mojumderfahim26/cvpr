@@ -1,56 +1,121 @@
-CNN-Based Image Classification on Fashion-MNIST
+Fashion Item Classification Using a Custom CNN
 
-Course: Computer Vision & Pattern Recognition
+Course: Computer Vision and Pattern Recognition
 Student Name: MD.Fahim Abdullah
 Student ID: 23-50691-1
+Framework: Python, PyTorch, Google Colab
+Dataset: Fashion-MNIST (Zalando Research; Kaggle / Hugging Face / torchvision)
 
-Overview
+Project Overview
 
-This project designs and trains a custom Convolutional Neural Network (CNN) in PyTorch to classify grayscale clothing images into 10 categories. The notebook covers the full pipeline: data loading, exploration, preprocessing, model building, training, evaluation, and model saving.
+This project implements a custom Convolutional Neural Network (CNN) in PyTorch to classify grayscale images of clothing items into 10 categories. The notebook covers dataset exploration, preprocessing, data augmentation, CNN design, training, validation, testing, and performance analysis.
 
 Dataset
-Name: Fashion-MNIST (Zalando Research), loaded via torchvision.datasets. It is also available on Kaggle and Hugging Face.
-Images: 70,000 in total, 28×28 pixels, 1 channel (grayscale).
-Split: 60,000 training images (divided 80% train / 20% validation) and 10,000 test images.
-Classes (10, balanced): T-shirt/top, Trouser, Pullover, Dress, Coat, Sandal, Shirt, Sneaker, Bag, Ankle boot.
-Preprocessing
-Training augmentation: random horizontal flip and random rotation (±10°).
-Conversion to tensors and normalisation with the dataset mean (0.2860) and standard deviation (0.3530).
-Validation and test data are only normalised, with no augmentation.
-Model Architecture
-Layer	Details
-Conv2d + ReLU + MaxPool	1 → 64 filters, 3×3 kernel (28→26→13)
-Conv2d + ReLU + MaxPool	64 → 128 filters, 3×3 kernel (13→11→5)
-Flatten	128 × 5 × 5 = 3200 features
-Linear + ReLU + Dropout	3200 → 256, dropout 0.3
-Linear (output)	256 → 10 logits
+Total images: 70,000
+Classes: 10 (T-shirt/top, Trouser, Pullover, Dress, Coat, Sandal, Shirt, Sneaker, Bag, Ankle boot)
+Input size: 28 × 28 grayscale (1 channel)
+Split: Official 60,000 training / 10,000 test split. The training set is further divided 80% / 20% into training and validation (random seed 42). The classes are perfectly balanced (6,000 training images per class).
+Subset	Number of images
+Training	48,000
+Validation	12,000
+Testing	10,000
+Preprocessing and Augmentation
+Convert images to tensors and normalize with mean 0.2860 and standard deviation 0.3530.
+Training only: random horizontal flip and random rotation (±10°).
+Validation and test images use deterministic preprocessing without augmentation.
+Custom CNN Architecture
 
-The model has about 0.9 million trainable parameters (896,522).
+The CNN is built from scratch and contains:
 
-Design justification: The first convolution learns simple patterns such as edges and textures, and the second combines them into larger shapes such as sleeves, straps and soles. Small 3×3 kernels are efficient, and max pooling reduces computation while adding tolerance to small shifts. Dropout reduces over-fitting in the large fully connected layer.
+Convolution (1 → 64 channels, 3×3), ReLU, max pooling
+Convolution (64 → 128 channels, 3×3), ReLU, max pooling
+Flatten → fully connected layer (256 units) → ReLU → dropout (0.3)
+Output fully connected layer (10 class logits)
 
-Training Setup
-Hyperparameter	Value
+Trainable parameters: 896,522
+
+Training Configuration
+Setting	Value
+Loss function	CrossEntropyLoss
 Optimizer	Adam
 Learning rate	0.001
-Loss function	CrossEntropyLoss
 Batch size	64
 Epochs	10
-Dropout	0.3
-Random seed	42 (for reproducibility)
-Evaluation
-Training and validation loss/accuracy curves over 10 epochs.
-Test loss and accuracy on the unseen test set: XX.XX% (replace after running).
-Per-class precision, recall and F1-score (classification report).
-Confusion matrix, per-class accuracy, and examples of misclassified images.
-Observation: Visually similar classes (Shirt, T-shirt/top, Pullover, Coat) are the hardest to separate at 28×28 resolution. Footwear, bags and trousers are recognised most easily.
+Model saved	Final trained weights (state_dict)
+Results
+
+The values below are from the latest recorded training and evaluation run in the project notebook.
+
+Metric	Result
+Final training accuracy	91.67%
+Final validation accuracy	91.36%
+Test loss	0.2658
+Test accuracy	90.85%
+Macro precision	91%
+Macro recall	91%
+Macro F1-score	91%
+
+Validation accuracy rose from 85.41% (epoch 1) to a peak of 91.67% (epoch 9), and the gap between training and validation accuracy stayed small, so there is no strong sign of over-fitting.
+
+Class-wise Findings
+The highest class-level F1-scores are for Trouser (0.99), Sandal (0.98) and Bag (0.98).
+Shirt was the most challenging class (F1-score 0.70, recall 64.10%).
+The largest directional confusion was Shirt → T-shirt/top, with 116 test images. Shirt was also confused with Coat (112 images) and Pullover (98 images).
+Visually similar upper-body items (Shirt, T-shirt/top, Pullover, Coat) are the hardest to separate at 28 × 28 resolution, while footwear, bags and trousers are recognised most easily.
+A high overall accuracy does not imply equally strong performance across all classes.
+Class	Per-class accuracy
+Bag	98.20%
+Trouser	97.50%
+Sandal	97.40%
+Sneaker	97.20%
+Ankle boot	96.30%
+Dress	91.80%
+Coat	90.80%
+Pullover	90.40%
+T-shirt/top	84.80%
+Shirt	64.10%
+Repository Files
+Fashion-MNIST-CNN/
+├── CNN_23-50691-1.ipynb       # Complete project notebook
+├── CNN_23-50691-1.pth         # Trained model weights (3.59 MB)
+└── README.md                  # Project documentation
+
+Dataset files are not included in this repository because they are downloaded automatically through torchvision.
+
+How to Run
+Open CNN_23-50691-1.ipynb in Google Colab.
+Select a GPU runtime if available: Runtime → Change runtime type → GPU.
+Run the cells in order. Fashion-MNIST downloads automatically, so no Kaggle credentials are needed.
+The notebook creates the train/validation split, trains the CNN, and saves the weights.
+Run the test-evaluation and visualization cells to reproduce the metrics and graphs.
+
+Note: Retraining may give slightly different results depending on random state, GPU environment, and library versions. The results reported above are the recorded results in the submitted notebook.
+
+Notebook Sections
+Introduction and Import Libraries
+Dataset Loading and Exploration
+Dataset Description
+Data Preprocessing and Augmentation
+Dataset Summary
+Hyperparameter Settings
+DataLoader Creation
+CNN Model Architecture
+Model Summary
+Training and Validation Functions
+Model Training
+Training and Validation Loss
+Training and Validation Accuracy
+Model Evaluation on Test Dataset
+Classification Report
+Confusion Matrix
 Model Saving
+Conclusion and Future Work
+Limitations and Future Work
+Fashion-MNIST images are small (28 × 28) and grayscale, so some classes look very similar and may not represent real-world product photos.
+Results come from a single training run with a fixed seed, so variation across runs is not measured.
+Future improvements include Batch Normalization, deeper architectures, stronger augmentation, a learning-rate scheduler, early stopping, analysis of misclassified images, and transfer learning with a pre-trained network.
 
-The trained weights are saved as CNN_23-50691-1.pth (about 3.5 MB). The notebook reloads them into a fresh model to confirm the test accuracy is unchanged.
+Notebook-e duita jaygay ekhono placeholder line ache. Submit korar age oigulo fill kore nio:
 
-Files
-CNN_23-50691-1.ipynb – full notebook
-CNN_23-50691-1.pth – trained model weights
-Future Work
-
-Batch Normalization, deeper networks, stronger augmentation, a learning-rate scheduler, early stopping, and transfer learning with a pre-trained network.
+Section 12/13-er “Explanation of the Curves” theke “Add your own observation here” line-e likho: validation loss best chilo epoch 9 (0.2369), tarpor epoch 10-e ekটু bere 0.2464 hoyeche.
+Section 18 (Conclusion) theke “Write your final test accuracy here” line-e likho: Test accuracy 90.85%.
